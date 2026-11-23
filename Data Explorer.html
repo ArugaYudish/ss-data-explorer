@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>SS Data Explorer</title>
+    <style>
+        :root {
+            --bg: #f7f7f5;
+            --sf: #fff;
+            --tx: #1c1c1a;
+            --mu: #6b6b66;
+            --bd: #dcdcd6;
+            --ac: #1d6b4f;
+            --ach: #e3f1ea;
+            --hd: #efeee9;
+            color-scheme: light;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        @media(prefers-color-scheme:dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #161615;
+                --sf: #20201e;
+                --tx: #ececE8;
+                --mu: #9a9a93;
+                --bd: #383835;
+                --ac: #5fc59a;
+                --ach: #1f3329;
+                --hd: #2a2a27;
+                color-scheme: dark
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #161615;
+            --sf: #20201e;
+            --tx: #ececE8;
+            --mu: #9a9a93;
+            --bd: #383835;
+            --ac: #5fc59a;
+            --ach: #1f3329;
+            --hd: #2a2a27;
+            color-scheme: dark
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--tx);
+            font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif
+        }
+
+        header {
+            padding: 14px 16px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--bd);
+            background: var(--sf)
+        }
+
+        h1 {
+            font-size: 17px;
+            margin: 0;
+            font-weight: 600
+        }
+
+        main {
+            padding: 14px 16px;
+            max-width: 1400px;
+            margin: auto
+        }
+
+        button,
+        select,
+        input {
+            font: inherit;
+            color: var(--tx);
+            background: var(--sf);
+            border: 1px solid var(--bd);
+            border-radius: 6px;
+            padding: 6px 10px
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        button:hover {
+            background: var(--ach)
+        }
+
+        button.p {
+            background: var(--ac);
+            color: #fff;
+            border-color: var(--ac)
+        }
+
+        .drop {
+            border: 2px dashed var(--bd);
+            border-radius: 10px;
+            padding: 40px 16px;
+            text-align: center;
+            color: var(--mu);
+            background: var(--sf)
+        }
+
+        .drop.on {
+            border-color: var(--ac);
+            background: var(--ach)
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin: 12px 0;
+            flex-wrap: wrap
+        }
+
+        .tabs button {
+            border-radius: 6px
+        }
+
+        .tabs button.a {
+            background: var(--ac);
+            color: #fff;
+            border-color: var(--ac)
+        }
+
+        .bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px
+        }
+
+        .card {
+            background: var(--sf);
+            border: 1px solid var(--bd);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px
+        }
+
+        .w {
+            overflow: auto;
+            max-height: 62vh;
+            border: 1px solid var(--bd);
+            border-radius: 8px;
+            background: var(--sf)
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px
+        }
+
+        th,
+        td {
+            padding: 5px 10px;
+            border-bottom: 1px solid var(--bd);
+            border-right: 1px solid var(--bd);
+            white-space: nowrap;
+            max-width: 320px;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: var(--hd);
+            text-align: left;
+            cursor: pointer;
+            user-select: none;
+            z-index: 1
+        }
+
+        th.s {
+            background: var(--ac);
+            color: #fff
+        }
+
+        td.n {
+            text-align: right;
+            font-variant-numeric: tabular-nums
+        }
+
+        td.rn,
+        th.rn {
+            color: var(--mu);
+            text-align: right;
+            background: var(--hd);
+            position: sticky;
+            left: 0
+        }
+
+        .nl {
+            color: var(--mu);
+            font-style: italic
+        }
+
+        .st {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 8px 12px;
+            background: var(--hd);
+            border: 1px solid var(--bd);
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 13px
+        }
+
+        .st b {
+            font-variant-numeric: tabular-nums
+        }
+
+        .mu {
+            color: var(--mu)
+        }
+
+        .chip {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            background: var(--ach);
+            border: 1px solid var(--bd);
+            border-radius: 99px;
+            padding: 2px 4px 2px 10px;
+            margin: 2px
+        }
+
+        .chip button {
+            border: 0;
+            background: none;
+            padding: 0 6px
+        }
+
+        .cols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 12px;
+            max-height: 120px;
+            overflow: auto;
+            margin: 6px 0
+        }
+
+        .hide {
+            display: none
+        }
+
+        label {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center
+        }
+
+        .pvw {
+            display: grid;
+            grid-template-columns: minmax(150px, 220px) 1fr;
+            gap: 10px;
+            margin-bottom: 10px
+        }
+
+        @media(max-width:760px) {
+            .pvw {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .fl {
+            max-height: 250px;
+            overflow: auto;
+            padding: 6px
+        }
+
+        .fi {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 3px 4px;
+            border: 1px solid var(--bd);
+            border-radius: 6px;
+            margin: 3px 0;
+            cursor: grab;
+            background: var(--sf);
+            font-size: 12px
+        }
+
+        .fi span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        .fi button {
+            padding: 0 5px;
+            font-size: 11px;
+            border-radius: 4px
+        }
+
+        .zs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .z {
+            border: 1px dashed var(--bd);
+            border-radius: 8px;
+            padding: 6px;
+            min-height: 70px;
+            background: var(--sf)
+        }
+
+        .z.on {
+            border-color: var(--ac);
+            background: var(--ach)
+        }
+
+        .z h4 {
+            margin: 0 0 4px;
+            font-size: 12px;
+            color: var(--mu)
+        }
+
+        .zc {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            flex-wrap: wrap;
+            background: var(--ach);
+            border: 1px solid var(--bd);
+            border-radius: 6px;
+            padding: 2px 4px;
+            margin: 2px 0;
+            font-size: 12px
+        }
+
+        .zc select {
+            padding: 1px 2px;
+            font-size: 11px
+        }
+
+        .zc button {
+            border: 0;
+            background: none;
+            padding: 0 3px
+        }
+
+        #gt th {
+            position: static;
+            cursor: default;
+            text-align: center
+        }
+
+        .tot td,
+        td.tot {
+            font-weight: 600;
+            background: var(--hd)
+        }
+
+        #ld {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50
+        }
+
+        #ld.hide {
+            display: none
+        }
+
+        #ld>div {
+            background: var(--sf);
+            border: 1px solid var(--bd);
+            border-radius: 12px;
+            padding: 20px 24px;
+            width: min(400px, 90vw)
+        }
+
+        .lb {
+            height: 8px;
+            background: var(--hd);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 12px
+        }
+
+        #ldb {
+            height: 100%;
+            width: 0;
+            background: var(--ac);
+            border-radius: 99px;
+            transition: width .15s
+        }
+
+        #ldb.ind {
+            width: 40% !important;
+            animation: ind 1.1s ease-in-out infinite
+        }
+
+        @keyframes ind {
+            0% {
+                transform: translateX(-100%)
+            }
+
+            100% {
+                transform: translateX(250%)
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>📊 SS Data Explorer</h1>
+        <input type="file" id="f" class="hide"><button class="p" onclick="f.click()">Buka file</button>
+        <select id="sheet" class="hide"></select><span id="info" class="mu"></span>
+    </header>
+    <main>
+        <div id="drop" class="drop">Seret file ke sini atau klik "Buka file"<br><small>Parquet, CSV, TSV, Excel
+                (xlsx/xls/ods), JSON, NDJSON · diproses di browser, data tidak diunggah</small></div>
+        <div id="app" class="hide">
+            <div class="tabs" id="tabs"></div>
+            <section id="t-data">
+                <div class="bar"><input id="q" placeholder="🔍 Cari di semua kolom..." size="26">
+                    <select id="fc"></select><select id="fo"></select><input id="fv" list="dl"
+                        placeholder="nilai (ketik untuk cari)" size="20"><datalist id="dl"></datalist>
+                    <button onclick="addF()">+ Filter</button><button onclick="clr()">Reset</button>
+                    <button onclick="copyTSV(view,D.cols)">Salin (TSV)</button><button class="dlb"
+                        onclick="exp('d','csv')">⬇ CSV</button>
+                    <select id="ps">
+                        <option>50</option>
+                        <option selected>100</option>
+                        <option>500</option>
+                        <option>1000</option>
+                    </select>
+                </div>
+                <div id="chips"></div>
+                <div class="w">
+                    <table id="tb"></table>
+                </div>
+                <div class="bar" style="margin-top:8px"><button onclick="pg(-1)">‹</button><span id="pi"></span><button
+                        onclick="pg(1)">›</button><span class="mu" id="cnt"></span></div>
+                <div class="st" id="sel">Klik header kolom untuk melihat Count / Sum / Avg / Min / Max.</div>
+            </section>
+            <section id="t-sum" class="hide">
+                <div class="mu" style="margin-bottom:8px">Statistik dihitung dari data hasil filter.</div>
+                <div class="w">
+                    <table id="sm"></table>
+                </div>
+            </section>
+            <section id="t-grp" class="hide">
+                <div class="mu" style="margin-bottom:6px">Seret field ke area, atau klik tombol kecil: F = Filter, K =
+                    Kolom, B = Baris, N = Nilai. Pivot otomatis ter-update dan dihitung dari data hasil filter di tab
+                    Data.</div>
+                <div class="pvw">
+                    <div class="card fl" id="fl"></div>
+                    <div class="zs" id="zs"></div>
+                </div>
+                <div class="bar"><label><input type="checkbox" checked onchange="oc('tr',this.checked)">Total
+                        baris</label><label><input type="checkbox" checked onchange="oc('tc',this.checked)">Total
+                        kolom</label><label><input type="checkbox" checked
+                            onchange="oc('sub',this.checked)">Subtotal</label><label><input type="checkbox"
+                            onchange="oc('heat',this.checked)">Heatmap</label>
+                    Desimal <select onchange="P.o.dec=this.value;pvRun()">
+                        <option>0</option>
+                        <option>1</option>
+                        <option selected>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                    </select>
+                    Urut baris <select onchange="P.o.sort=this.value;pvRun()">
+                        <option value="az">Label A-Z</option>
+                        <option value="za">Label Z-A</option>
+                        <option value="vd">Nilai terbesar</option>
+                        <option value="va">Nilai terkecil</option>
+                    </select>
+                    <button onclick="copyPv()">Salin hasil</button><button class="dlb" onclick="exp('p','csv')">⬇
+                        CSV</button><span id="pinfo" class="mu"></span>
+                </div>
+                <div id="fp"></div>
+                <div class="w">
+                    <table id="gt"></table>
+                </div>
+            </section>
+            <section id="t-ch" class="hide">
+                <div class="card">
+                    <div class="bar"><b>Sumbu X</b> <select id="cx" onchange="chRun()"></select><select id="cg"
+                            onchange="chRun()"></select>
+                        <b>Seri</b> <select id="cs" onchange="chRun()"></select>
+                        <b>Nilai</b> <select id="cv" onchange="chRun()"></select><select id="ca"
+                            onchange="chRun()"></select>
+                    </div>
+                    <div class="bar" style="margin:0"><b>Tipe</b> <select id="ct" onchange="chDraw()">
+                            <option value="bar">Bar</option>
+                            <option value="stack">Bar bertumpuk</option>
+                            <option value="line">Garis</option>
+                            <option value="area">Area</option>
+                            <option value="pie">Pie</option>
+                            <option value="doughnut">Donut</option>
+                        </select>
+                        Urut <select id="co" onchange="chRun()">
+                            <option value="l">Label</option>
+                            <option value="v">Nilai terbesar</option>
+                        </select>
+                        Tampilkan <select id="cn" onchange="chRun()">
+                            <option value="0">Semua</option>
+                            <option value="10">Top 10</option>
+                            <option value="20" selected>Top 20</option>
+                            <option value="50">Top 50</option>
+                        </select>
+                        <span class="mu">Dihitung dari data hasil filter di tab Data.</span> <button class="dlb"
+                            onclick="exp('c','csv')">⬇ CSV</button>
+                    </div>
+                </div>
+                <div class="card"><b>Simulasi what-if</b> <span class="mu">geser untuk melihat dampak kenaikan/penurunan
+                        angka</span>
+                    <div class="bar" style="margin:8px 0 0"><label>Semua seri <input type="range" id="cm" min="-50"
+                                max="100" value="0" oninput="$('#cmv').textContent=this.value+'%';chDraw()"><b
+                                id="cmv">0%</b></label><button
+                            onclick="$('#cm').value=0;$('#cmv').textContent='0%';chRun()">Reset</button></div>
+                    <div class="bar" id="csl" style="margin:6px 0 0"></div>
+                    <div id="ck" class="st"></div>
+                </div>
+                <div class="card">
+                    <div style="position:relative;height:380px"><canvas id="cc"></canvas></div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <div id="ld" class="hide">
+        <div><b id="ldt">Memuat...</b>
+            <div class="lb">
+                <div id="ldb"></div>
+            </div>
+            <div class="mu" style="margin-top:8px;font-size:12px">File besar bisa butuh waktu. Jangan tutup halaman ini.
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script>
+        const $ = s => document.querySelector(s), H = 'https://cdn.jsdelivr.net/npm/hyparquet@1.12.0/+esm', C = 'https://cdn.jsdelivr.net/npm/hyparquet-compressors@1.1.1/+esm';
+        let D = { cols: [], rows: [] }, SH = {}, filters = [], sort = { c: null, d: 1 }, page = 0, view = [], sc = null, G = { cols: [], rows: [] };
+        const OPS = ['mengandung', 'tidak mengandung', '=', '≠', '>', '≥', '<', '≤', 'diawali', 'diakhiri', 'regex', 'kosong', 'terisi'];
+        const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        const em = v => v == null || v === ''; const num = v => typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' && !isNaN(v) ? +v : NaN);
+        const fmt = v => v == null ? '' : v instanceof Date ? v.toISOString().slice(0, 19).replace('T', ' ') : typeof v === 'number' ? (Number.isInteger(v) ? String(v) : String(+v.toFixed(6))) : String(v);
+        function norm(rows) {
+            const set = new Set(); rows.slice(0, 500).forEach(r => Object.keys(r).forEach(k => set.add(k)));
+            rows.forEach(r => { for (const k in r) { let v = r[k]; if (typeof v === 'bigint') r[k] = Number(v); else if (v && typeof v === 'object' && !(v instanceof Date)) r[k] = JSON.stringify(v, (_, x) => typeof x === 'bigint' ? Number(x) : x) } });
+            return { cols: [...set], rows }
+        }
+        async function readF(file) {
+            const ext = file.name.split('.').pop().toLowerCase(), buf = await rd(file); LD('Mengurai data, mohon tunggu... (file besar bisa beberapa saat)'); await tick();
+            if (ext === 'parquet' || ext === 'pq') { const [h, c] = await Promise.all([import(H), import(C)]); return { data: norm(await h.parquetReadObjects({ file: buf, compressors: c.compressors })) } }
+            if (['json', 'jsonl', 'ndjson'].includes(ext)) {
+                const t = new TextDecoder().decode(buf); let j; try { j = JSON.parse(t) } catch { j = t.split('\n').filter(x => x.trim()).map(x => JSON.parse(x)) }
+                if (!Array.isArray(j)) j = Object.values(j).find(Array.isArray) || [j]; return { data: norm(j.map(r => typeof r === 'object' && r ? r : { value: r })) }
+            }
+            const wb = XLSX.read(buf, { type: 'array', cellDates: true }), o = {}; wb.SheetNames.forEach(s => o[s] = norm(XLSX.utils.sheet_to_json(wb.Sheets[s], { defval: null, raw: true }))); return o
+        }
+        function fillSel(el, names, sel) { el.innerHTML = names.map(n => `<option>${esc(n)}</option>`).join(''); if (sel) el.value = sel }
+        async function load(file) {
+            $('#info').textContent = 'Membaca ' + file.name + '...'; LD('Membaca file...', 0); await tick();
+            try { SH = await readF(file); const n = Object.keys(SH); fillSel($('#sheet'), n); $('#sheet').classList.toggle('hide', n.length < 2); LD('Menyiapkan tampilan...'); await tick(); use(n[0]); $('#info').textContent = file.name; FN = file.name.replace(/\.[^.]+$/, ''); $('#drop').classList.add('hide'); $('#app').classList.remove('hide') }
+            catch (e) { $('#info').textContent = 'Gagal membaca file: ' + e.message; alert('Gagal membaca file: ' + e.message) } finally { LX() }
+        }
+        function use(n) {
+            D = SH[n]; filters = []; sort = { c: null, d: 1 }; sc = null; page = 0; $('#q').value = '';
+            fillSel($('#fc'), D.cols); fillSel($('#fo'), OPS); dlist(); chInit(); P = { f: [], c: [], r: [], v: [], o: P ? P.o : { tr: 1, tc: 1, sub: 1, heat: 0, dec: 2, sort: 'az' } }; $('#fp').innerHTML = ''; tabs(); show('data'); apply()
+        }
+        const TB = [['data', 'Data'], ['sum', 'Ringkasan'], ['grp', 'Pivot'], ['ch', 'Chart']];
+        function tabs() { $('#tabs').innerHTML = TB.map(([k, l]) => `<button data-k="${k}" onclick="show('${k}')">${l}</button>`).join('') }
+        function show(k) { TB.forEach(([t]) => $('#t-' + t).classList.toggle('hide', t !== k)); document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('a', b.dataset.k === k)); if (k === 'sum') summary(); if (k === 'grp') pvUI(); if (k === 'ch') chRun() }
+        function test(v, op, q) {
+            const e = em(v); if (op === 'kosong') return e; if (op === 'terisi') return !e; if (e) return false;
+            const s = fmt(v).toLowerCase(), t = q.toLowerCase(), a = num(v), b = num(q), eq = s === t || (!isNaN(a) && a === b);
+            switch (op) {
+                case 'mengandung': return s.includes(t); case 'tidak mengandung': return !s.includes(t); case '=': return eq; case '≠': return !eq;
+                case '>': return a > b; case '≥': return a >= b; case '<': return a < b; case '≤': return a <= b; case 'diawali': return s.startsWith(t); case 'diakhiri': return s.endsWith(t);
+                case 'regex': try { return new RegExp(q, 'i').test(fmt(v)) } catch { return false }
+            }
+        }
+        function addF() { const v = $('#fv').value, op = $('#fo').value; if (!v && !['kosong', 'terisi'].includes(op)) return; filters.push({ c: $('#fc').value, o: op, v }); $('#fv').value = ''; page = 0; apply() }
+        function clr() { filters = []; $('#q').value = ''; sort = { c: null, d: 1 }; page = 0; apply() }
+        function rmF(i) { filters.splice(i, 1); apply() }
+        function apply() {
+            const q = $('#q').value.toLowerCase();
+            view = D.rows.filter(r => filters.every(f => test(r[f.c], f.o, f.v)) && (!q || D.cols.some(c => fmt(r[c]).toLowerCase().includes(q))));
+            if (sort.c != null) { const c = sort.c, d = sort.d; view = [...view].sort((x, y) => { const a = x[c], b = y[c]; if (em(a)) return 1; if (em(b)) return -1; const na = num(a), nb = num(b); return (!isNaN(na) && !isNaN(nb) ? na - nb : fmt(a).localeCompare(fmt(b))) * d }) }
+            $('#chips').innerHTML = filters.map((f, i) => `<span class="chip">${esc(f.c)} ${f.o} ${esc(f.v)}<button onclick="rmF(${i})">✕</button></span>`).join(''); render()
+        }
+        function render() {
+            const PS = +$('#ps').value, tp = Math.max(1, Math.ceil(view.length / PS)); page = Math.min(page, tp - 1); const s = page * PS, rows = view.slice(s, s + PS);
+            $('#tb').innerHTML = '<thead><tr><th class="rn">#</th>' + D.cols.map((c, i) => `<th class="${sc === c ? 's' : ''}" onclick="selC(${i})" ondblclick="srt(${i})" title="Klik: pilih kolom · Klik 2x: urutkan">${esc(c)}${sort.c === c ? (sort.d > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('') + '</tr></thead><tbody>' +
+                rows.map((r, i) => `<tr><td class="rn">${s + i + 1}</td>` + D.cols.map(c => { const v = r[c]; return v == null ? '<td class="nl">null</td>' : `<td class="${typeof v === 'number' ? 'n' : ''}">${esc(fmt(v))}</td>` }).join('') + '</tr>').join('') + '</tbody>';
+            $('#pi').textContent = `Hal ${page + 1}/${tp}`; $('#cnt').textContent = `${view.length.toLocaleString('id')} dari ${D.rows.length.toLocaleString('id')} baris · ${D.cols.length} kolom`; selStat()
+        }
+        function pg(d) { page = Math.max(0, page + d); render() } $('#ps').onchange = () => { page = 0; render() }; $('#q').oninput = () => { page = 0; apply() };
+        function srt(i) { const c = D.cols[i]; sort = sort.c === c ? { c, d: -sort.d } : { c, d: 1 }; apply() }
+        function selC(i) { sc = D.cols[i]; render() }
+        const f2 = (x) => isFinite(x) ? (+x.toFixed(4)).toLocaleString('id', { maximumFractionDigits: 4 }) : '-';
+        function stats(vals) {
+            const nn = vals.filter(v => !em(v)), ns = nn.map(num).filter(x => !isNaN(x)), sum = ns.reduce((a, b) => a + b, 0), so = [...ns].sort((a, b) => a - b);
+            return { total: vals.length, count: nn.length, empty: vals.length - nn.length, distinct: new Set(nn.map(fmt)).size, nums: ns.length, sum, avg: ns.length ? sum / ns.length : NaN, min: ns.length ? so[0] : NaN, max: ns.length ? so[so.length - 1] : NaN, med: ns.length ? (so[(so.length - 1) >> 1] + so[so.length >> 1]) / 2 : NaN }
+        }
+        function selStat() {
+            if (!sc) { $('#sel').innerHTML = 'Klik header kolom untuk melihat Count / Sum / Avg / Min / Max (klik 2x untuk mengurutkan).'; return }
+            const s = stats(view.map(r => r[sc])); $('#sel').innerHTML = `<span><b>${esc(sc)}</b></span><span>Count <b>${f2(s.count)}</b></span><span>Kosong <b>${f2(s.empty)}</b></span><span>Distinct <b>${f2(s.distinct)}</b></span>` + (s.nums ? `<span>Sum <b>${f2(s.sum)}</b></span><span>Avg <b>${f2(s.avg)}</b></span><span>Min <b>${f2(s.min)}</b></span><span>Max <b>${f2(s.max)}</b></span><span>Median <b>${f2(s.med)}</b></span>` : '<span class="mu">(bukan numerik)</span>')
+        }
+        function summary() {
+            $('#sm').innerHTML = '<thead><tr>' + ['Kolom', 'Tipe', 'Terisi', 'Kosong', 'Distinct', 'Sum', 'Avg', 'Min', 'Max', 'Median'].map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>' +
+                D.cols.map(c => { const s = stats(view.map(r => r[c])), isn = s.nums && s.nums === s.count; return `<tr><td>${esc(c)}</td><td>${isn ? 'angka' : 'teks'}</td><td class="n">${f2(s.count)}</td><td class="n">${f2(s.empty)}</td><td class="n">${f2(s.distinct)}</td>` + (s.nums ? [s.sum, s.avg, s.min, s.max, s.med].map(x => `<td class="n">${f2(x)}</td>`).join('') : '<td></td>'.repeat(5)) + '</tr>' }).join('') + '</tbody>'
+        }
+        function tbl(el, cols, rows) { $(el).innerHTML = '<thead><tr>' + cols.map(c => `<th>${esc(c)}</th>`).join('') + '</tr></thead><tbody>' + rows.map(r => '<tr>' + cols.map(c => `<td class="${typeof r[c] === 'number' ? 'n' : ''}">${esc(fmt(r[c]))}</td>`).join('') + '</tr>').join('') + '</tbody>' }
+        let P, FV = []; const SEP = '\u0001', S2 = '\u0002', ZN = { f: 'Filter', c: 'Kolom', r: 'Baris', v: 'Nilai' }, ZL = { f: 'F', c: 'K', r: 'B', v: 'N' };
+        const AG = [['sum', 'Sum'], ['count', 'Jumlah baris'], ['cnt', 'Count terisi'], ['avg', 'Average'], ['min', 'Min'], ['max', 'Max'], ['cd', 'Distinct']], SA = [['n', 'Nilai'], ['tot', '% total'], ['row', '% baris'], ['col', '% kolom']], GR = [['a', 'Asli'], ['y', 'Tahun'], ['m', 'Bulan'], ['d', 'Hari']];
+        const opt = (L, s) => L.map(([k, l]) => `<option value="${k}"${k === s ? ' selected' : ''}>${l}</option>`).join(''), isNum = c => D.rows.slice(0, 200).some(r => typeof r[c] === 'number');
+        let CH, CD, CM = {}; const PAL = ['#1d6b4f', '#2f7fc1', '#d98e04', '#b0413e', '#7b5ea7', '#2a9d8f', '#e76f51', '#8d99ae', '#6a994e', '#bc6c25'];
+        function dlist() { $('#dl').innerHTML = [...new Set(D.rows.map(r => fmt(r[$('#fc').value])))].filter(Boolean).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).slice(0, 1000).map(v => `<option value="${esc(v)}">`).join('') }
+        $('#fc').onchange = dlist;
+        function fq(q) { q = q.toLowerCase(); document.querySelectorAll('#fcl label').forEach((l, j) => l.style.display = FV[j].toLowerCase().includes(q) ? '' : 'none') }
+        function fonly(i) { const q = $('#fp input').value.toLowerCase(); P.f[i].ex = new Set(FV.filter(v => !v.toLowerCase().includes(q))); fpick(i); pvUI() }
+        function chInit() { fillSel($('#cx'), D.cols); fillSel($('#cs'), ['(tidak ada)', ...D.cols]); fillSel($('#cv'), D.cols, D.cols.find(isNum)); $('#cg').innerHTML = opt(GR, 'a'); $('#ca').innerHTML = opt(AG, 'sum'); CD = null }
+        function ag2(rs, a, c) { if (a === 'count') return rs.length; let n = 0, s = 0, mn = 1 / 0, mx = -1 / 0, cn = 0; const st = a === 'cd' ? new Set() : 0; for (const r of rs) { const x = r[c]; if (em(x)) continue; cn++; if (st) st.add(fmt(x)); const y = num(x); if (y === y) { n++; s += y; if (y < mn) mn = y; if (y > mx) mx = y } } return ({ sum: s, avg: n ? s / n : 0, min: n ? mn : 0, max: n ? mx : 0, cd: st ? st.size : 0, cnt: cn })[a] }
+        function chRun() {
+            if (!window.Chart || !D.cols.length) return; const gx = $('#cg').value, x = $('#cx').value, sv = $('#cs').value, s = sv === '(tidak ada)' ? null : sv, c = $('#cv').value, a = $('#ca').value, m = new Map(), tq = new Map(), tv = new Map();
+            view.forEach(r => { const k = gk(r[x], gx), q = s ? gk(r[s], 'a') : 'Nilai'; let o = m.get(k); if (!o) m.set(k, o = new Map()); let l = o.get(q); if (!l) o.set(q, l = []); l.push(r) });
+            m.forEach((o, k) => { let t = 0; o.forEach((l, q) => { const v = ag2(l, a, c); t += v; tq.set(q, (tq.get(q) || 0) + v) }); tv.set(k, t) });
+            let xs = [...m.keys()]; if ($('#co').value === 'v') xs.sort((p, q) => tv.get(q) - tv.get(p)); else xs.sort((p, q) => p.localeCompare(q, undefined, { numeric: true }));
+            const n = +$('#cn').value; if (n) xs = xs.slice(0, n); const ss = [...tq.entries()].sort((p, q) => q[1] - p[1]).slice(0, 10).map(e => e[0]);
+            CD = { xs, ss, b: Object.fromEntries(ss.map(q => [q, xs.map(k => { const l = m.get(k).get(q); return l ? ag2(l, a, c) : 0 })])) }; CM = {};
+            $('#csl').innerHTML = ss.length > 1 ? ss.map((q, i) => `<label>${esc(q)} <input type="range" min="-50" max="100" value="0" oninput="CM[CD.ss[${i}]]=+this.value;$('#sv${i}').textContent=this.value+'%';chDraw()"><b id="sv${i}">0%</b></label>`).join('') : ''; chDraw()
+        }
+        function chDraw() {
+            if (!CD || !window.Chart) return; const t = $('#ct').value, pie = t === 'pie' || t === 'doughnut', g = 1 + $('#cm').value / 100, ty = t === 'area' ? 'line' : t === 'stack' ? 'bar' : t, ds = [], fac = q => g * (1 + (CM[q] || 0) / 100); let T0 = 0, T1 = 0;
+            CD.ss.forEach(q => CD.b[q].forEach(v => { T0 += v; T1 += v * fac(q) }));
+            if (pie) ds.push({ data: CD.xs.map((_, j) => CD.ss.reduce((s, q) => s + CD.b[q][j] * fac(q), 0)), backgroundColor: CD.xs.map((_, j) => PAL[j % 10]) });
+            else CD.ss.forEach((q, i) => {
+                const f = fac(q), col = PAL[i % 10]; ds.push({ label: q + (f !== 1 ? ' (simulasi)' : ''), data: CD.b[q].map(v => v * f), backgroundColor: ty === 'line' && t !== 'area' ? col : col + 'bb', borderColor: col, fill: t === 'area', tension: .25, stack: t === 'stack' ? 's' : undefined });
+                if (f !== 1) ds.push({ type: 'line', label: q + ' (asli)', data: CD.b[q], borderColor: col, borderDash: [5, 4], backgroundColor: 'transparent', pointRadius: 0, fill: false, order: -1 })
+            });
+            const cs = getComputedStyle(document.body); Chart.defaults.color = cs.color; Chart.defaults.borderColor = cs.getPropertyValue('--bd'); if (CH) CH.destroy();
+            CH = new Chart($('#cc'), { type: ty, data: { labels: CD.xs, datasets: ds }, options: { responsive: true, maintainAspectRatio: false, scales: pie ? {} : { x: { stacked: t === 'stack' }, y: { stacked: t === 'stack', ticks: { callback: v => v.toLocaleString('id') } } }, plugins: { legend: { display: pie || ds.length > 1 } } } });
+            $('#ck').innerHTML = `<span>Total asli <b>${f2(T0)}</b></span><span>Total simulasi <b>${f2(T1)}</b></span><span>Selisih <b>${f2(T1 - T0)}</b> (${T0 ? f2((T1 / T0 - 1) * 100) : 0}%)</span>`
+        }
+        let FN = 'data', DLC = null; (async () => { try { DLC = await claude.use('downloads') } catch (e) { } })();
+        async function save(name, data) { if (!DLC) return alert('Unduh tidak tersedia di tampilan ini. Gunakan tombol Salin lalu tempel ke Excel.'); try { await DLC.save({ filename: name, data }) } catch (e) { if (!e || e.code !== 'declined') alert('Gagal mengunduh: ' + ((e && (e.message || e.code)) || e)) } }
+        function tbl2d(t) { const g = [];[...t.rows].forEach((tr, y) => { g[y] = g[y] || []; let x = 0;[...tr.cells].forEach(c => { while (g[y][x] !== undefined) x++; const v = c.dataset.v !== undefined ? +c.dataset.v : c.textContent.trim(); for (let i = 0; i < c.rowSpan; i++)for (let j = 0; j < c.colSpan; j++)(g[y + i] = g[y + i] || [])[x + j] = v; x += c.colSpan }) }); return g }
+        function aoa(s) {
+            if (s === 'd') return [D.cols, ...view.map(r => D.cols.map(c => r[c] ?? null))];
+            if (s === 'p') {
+                const t = $('#gt'), g = tbl2d(t), h = t.tHead ? t.tHead.rows.length : 0, nR = [...t.querySelectorAll('tbody tr:first-child td')].filter(c => !c.classList.contains('n')).length; let pr = null;
+                for (let y = h; y < g.length; y++) { if (t.rows[y].className) continue; if (pr) for (let j = 0; j < nR; j++)if (g[y][j] === '') g[y][j] = pr[j]; pr = g[y] } return g
+            }
+            if (!CD) return []; const g = 1 + $('#cm').value / 100, f = q => g * (1 + (CM[q] || 0) / 100);
+            return [[$('#cx').value, ...CD.ss.flatMap(q => [q + ' (asli)', q + ' (simulasi)'])], ...CD.xs.map((k, j) => [k, ...CD.ss.flatMap(q => [CD.b[q][j], CD.b[q][j] * f(q)])])]
+        }
+        async function exp(s, t) {
+            const a = aoa(s); if (a.length < 2) return alert('Belum ada data untuk diunduh. Siapkan dulu tabel atau chart-nya.'); const nm = FN + '_' + ({ d: 'data', p: 'pivot', c: 'chart' })[s];
+            if (t === 'csv') { const q = v => { const x = v == null ? '' : typeof v === 'number' ? String(v) : fmt(v); return /[",\n\r]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x }; return save(nm + '.csv', '\uFEFF' + a.map(r => Array.from(r, q).join(',')).join('\n')) }
+        }
+        const LD = (t, p) => { $('#ld').classList.remove('hide'); $('#ldt').textContent = t; const b = $('#ldb'); if (p == null) { b.classList.add('ind'); b.style.width = '' } else { b.classList.remove('ind'); b.style.width = p + '%' } }, LX = () => $('#ld').classList.add('hide'), tick = () => new Promise(r => setTimeout(r, 60));
+        function rd(f) { return new Promise((ok, no) => { const r = new FileReader(); r.onprogress = e => { if (e.lengthComputable) { const p = Math.round(e.loaded / e.total * 100); LD(`Membaca file ${(f.size / 1048576).toFixed(1)} MB... ${p}%`, p) } }; r.onload = () => ok(r.result); r.onerror = () => no(r.error); r.readAsArrayBuffer(f) }) }
+        function oc(k, v) { P.o[k] = v ? 1 : 0; pvRun() }
+        function addZ(z, c) { if (c == null) return; if (z !== 'v') ['f', 'c', 'r'].forEach(k => P[k] = P[k].filter(x => x.c !== c)); P[z].push(z === 'v' ? { c, a: isNum(c) ? 'sum' : 'count', s: 'n' } : z === 'f' ? { c, ex: new Set() } : { c, g: 'a' }); pvUI() }
+        function delZ(z, i) { P[z].splice(i, 1); if (z === 'f') $('#fp').innerHTML = ''; pvUI() }
+        function mvZ(z, i, d) { const a = P[z], j = i + d; if (j < 0 || j >= a.length) return;[a[i], a[j]] = [a[j], a[i]]; pvUI() }
+        function setZ(z, i, k, v) { P[z][i][k] = v; pvRun() }
+        function pvUI() {
+            $('#fl').innerHTML = D.cols.map((c, i) => `<div class="fi" draggable="true" ondragstart="event.dataTransfer.setData('text/plain',${i})"><span title="${esc(c)}">${esc(c)}</span>${Object.keys(ZN).map(z => `<button title="${ZN[z]}" onclick="addZ('${z}',D.cols[${i}])">${ZL[z]}</button>`).join('')}</div>`).join('');
+            $('#zs').innerHTML = Object.keys(ZN).map(z => `<div class="z" ondragover="event.preventDefault();this.classList.add('on')" ondragleave="this.classList.remove('on')" ondrop="event.preventDefault();this.classList.remove('on');addZ('${z}',D.cols[+event.dataTransfer.getData('text/plain')])"><h4>${ZN[z]}</h4>` + P[z].map((x, i) => `<div class="zc"><b>${esc(x.c)}</b>` + (z === 'v' ? `<select onchange="setZ('v',${i},'a',this.value)">${opt(AG, x.a)}</select><select onchange="setZ('v',${i},'s',this.value)">${opt(SA, x.s)}</select>` : z === 'f' ? `<button onclick="fpick(${i})">▾ ${x.ex.size ? x.ex.size + ' disembunyi' : 'semua'}</button>` : `<select onchange="setZ('${z}',${i},'g',this.value)">${opt(GR, x.g)}</select>`) + (z === 'f' || P[z].length < 2 ? '' : `<button onclick="mvZ('${z}',${i},-1)">‹</button><button onclick="mvZ('${z}',${i},1)">›</button>`) + `<button onclick="delZ('${z}',${i})">✕</button></div>`).join('') + '</div>').join('');
+            pvRun()
+        }
+        function fpick(i) {
+            const x = P.f[i]; FV = [...new Set(D.rows.map(r => fmt(r[x.c])))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).slice(0, 2000);
+            $('#fp').innerHTML = `<div class="card"><b>Filter ${esc(x.c)}</b> <button onclick="fall(${i},1)">Pilih semua</button><button onclick="fall(${i},0)">Kosongkan</button><button onclick="$('#fp').innerHTML=''">Tutup</button><br><input placeholder="Cari nilai..." oninput="fq(this.value)" size="22"> <button onclick="fonly(${i})">Hanya yang cocok</button><div class="cols" id="fcl">${FV.map((v, j) => `<label><input type="checkbox" ${x.ex.has(v) ? '' : 'checked'} onchange="ftog(${i},${j},this.checked)">${esc(v) || '(kosong)'}</label>`).join('')}</div></div>`
+        }
+        function ftog(i, j, ch) { ch ? P.f[i].ex.delete(FV[j]) : P.f[i].ex.add(FV[j]); pvUI() }
+        function fall(i, a) { P.f[i].ex = a ? new Set() : new Set(FV); fpick(i); pvUI() }
+        function gk(v, g) { if (em(v)) return '(kosong)'; if (g === 'a') return fmt(v); const d = v instanceof Date ? v : new Date(v); if (isNaN(d)) return fmt(v); const s = d.toISOString(); return g === 'y' ? s.slice(0, 4) : g === 'm' ? s.slice(0, 7) : s.slice(0, 10) }
+        function pvRun() {
+            if (!P || !D.cols.length) return; const R = P.r, Cc = P.c, V = P.v, o = P.o;
+            if (!V.length) { $('#gt').innerHTML = '<tbody><tr><td class="mu">Tambahkan field ke Nilai (N), lalu ke Baris (B) dan/atau Kolom (K).</td></tr></tbody>'; $('#pinfo').textContent = ''; return }
+            const rows = view.filter(r => P.f.every(f => !f.ex.size || !f.ex.has(fmt(r[f.c])))), M = new Map(), rp = new Map(), cp = new Map(), add = (k, r) => { let a = M.get(k); if (!a) M.set(k, a = []); a.push(r) };
+            rows.forEach(r => {
+                const rl = R.map(x => gk(r[x.c], x.g)), cl = Cc.map(x => gk(r[x.c], x.g)), rk = rl.join(SEP), ck = cl.join(SEP); rp.set(rk, rl); cp.set(ck, cl);
+                const xs = ['R' + rk, '', ...(R.length > 1 ? ['S' + rl[0]] : [])], ys = [ck, '']; new Set(xs.flatMap(x => ys.map(y => x + S2 + y))).forEach(k => add(k, r))
+            });
+            const g = (x, y) => M.get(x + S2 + y), A = (v, rs) => {
+                if (!rs) return null; if (v.a === 'count') return rs.length; let n = 0, s = 0, mn = 1 / 0, mx = -1 / 0, cn = 0; const st = v.a === 'cd' ? new Set() : 0;
+                for (const r of rs) { const x = r[v.c]; if (em(x)) continue; cn++; if (st) st.add(fmt(x)); const y = num(x); if (y === y) { n++; s += y; if (y < mn) mn = y; if (y > mx) mx = y } }
+                return ({ sum: s, avg: n ? s / n : null, min: n ? mn : null, max: n ? mx : null, cd: st ? st.size : 0, cnt: cn })[v.a]
+            },
+                val = (v, x, y) => { const a = A(v, g(x, y)); if (a == null || v.s === 'n') return a; const d = A(v, v.s === 'tot' ? g('', '') : v.s === 'row' ? g(x, '') : g('', y)); return d ? a / d : null },
+                F = (v, x) => x == null ? '' : (v.s === 'n' ? x : x * 100).toLocaleString('id', { maximumFractionDigits: +o.dec }) + (v.s === 'n' ? '' : '%'),
+                cmp = (a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }),
+                so = o.sort, lab = so === 'az' ? 1 : so === 'za' ? -1 : 0, dir = so === 'va' ? -1 : 1, nv = x => val(V[0], x, '') ?? 0;
+            let rks = [...rp.keys()].sort((a, b) => {
+                const A1 = rp.get(a), B1 = rp.get(b);
+                if (lab) { for (let i = 0; i < A1.length; i++) { const c = cmp(A1[i], B1[i]); if (c) return c * lab } return 0 }
+                if (R.length > 1 && A1[0] !== B1[0]) return (nv('S' + B1[0]) - nv('S' + A1[0])) * dir || cmp(A1[0], B1[0]);
+                return (nv('R' + b) - nv('R' + a)) * dir || cmp(a, b)
+            });
+            if (rks.length > 5000) rks = rks.slice(0, 5000);
+            let cks = [...cp.keys()].sort((a, b) => { const A1 = cp.get(a), B1 = cp.get(b); for (let i = 0; i < A1.length; i++) { const c = cmp(A1[i], B1[i]); if (c) return c } return 0 }); if (cks.length > 200) cks = cks.slice(0, 200);
+            const leaves = [...cks.flatMap(ck => V.map(v => [ck, v])), ...(o.tc && Cc.length ? V.map(v => ['', v]) : [])], nR = Math.max(R.length, 1), sub = R.length > 1 && o.sub,
+                mk = (x, l, c) => ({ l, c, v: leaves.map(([y, v]) => val(v, x, y)) }), out = []; let pl = [];
+            rks.forEach((rk, i) => {
+                const L = rp.get(rk); if (sub && i && L[0] !== pl[0]) out.push(mk('S' + pl[0], ['Subtotal ' + pl[0]], 'tot'));
+                out.push(mk('R' + rk, L.map((x, j) => pl.slice(0, j + 1).join(SEP) === L.slice(0, j + 1).join(SEP) ? '' : x), '')); pl = L
+            });
+            if (sub && pl.length) out.push(mk('S' + pl[0], ['Subtotal ' + pl[0]], 'tot'));
+            if (o.tr) out.push(mk('', ['Total'], 'tot'));
+            const hr = V.map(() => [1 / 0, -1 / 0]); if (o.heat) out.forEach(r => { if (!r.c) leaves.forEach(([y, v], li) => { const x = r.v[li]; if (x != null && (y !== '' || !Cc.length)) { const q = hr[V.indexOf(v)]; if (x < q[0]) q[0] = x; if (x > q[1]) q[1] = x } }) });
+            const vn = v => AG.find(a => a[0] === v.a)[1] + ' ' + v.c + (v.s !== 'n' ? ' (' + SA.find(a => a[0] === v.s)[1] + ')' : ''); let H = '';
+            for (let l = 0; l <= Cc.length; l++) {
+                H += '<tr>'; if (!l) H += Array.from({ length: nR }, (_, j) => `<th rowspan="${Cc.length + 1}">${esc(R[j] ? R[j].c : '')}</th>`).join('');
+                if (l < Cc.length) {
+                    let i = 0; while (i < cks.length) { let j = i; const pre = cp.get(cks[i]).slice(0, l + 1).join(SEP); while (j < cks.length && cp.get(cks[j]).slice(0, l + 1).join(SEP) === pre) j++; H += `<th colspan="${(j - i) * V.length}">${esc(cp.get(cks[i])[l])}</th>`; i = j }
+                    if (!l && o.tc) H += `<th rowspan="${Cc.length}" colspan="${V.length}">Total</th>`
+                }
+                else H += leaves.map(([y, v]) => `<th>${esc(vn(v))}</th>`).join(''); H += '</tr>'
+            }
+            const B = out.map(r => `<tr class="${r.c}">` + Array.from({ length: nR }, (_, j) => `<td>${esc(r.l[j] ?? '')}</td>`).join('') + leaves.map(([y, v], li) => {
+                const x = r.v[li], q = hr[V.indexOf(v)], t = y === '' && Cc.length ? ' tot' : ''; let st = '';
+                if (o.heat && !r.c && !t && x != null && q[1] > q[0]) st = ` style="background:color-mix(in srgb,var(--ac) ${Math.round((x - q[0]) / (q[1] - q[0]) * 55)}%,transparent)"`; return `<td class="n${t}"${st}${x == null ? '' : ` data-v="${v.s === 'n' ? x : x * 100}"`}>${F(v, x)}</td>`
+            }).join('') + '</tr>').join('');
+            $('#gt').innerHTML = '<thead>' + H + '</thead><tbody>' + B + '</tbody>'; $('#pinfo').textContent = `${rows.length.toLocaleString('id')} baris data → ${rks.length.toLocaleString('id')} baris pivot`
+        }
+        function copyPv() { const t = [...$('#gt').rows].map(r => [...r.cells].flatMap(c => [c.textContent.trim(), ...Array(Math.max(0, c.colSpan - 1)).fill('')]).join('\t')).join('\n'), ok = () => alert('Pivot disalin. Tempel ke Excel/Sheets.'); try { navigator.clipboard.writeText(t).then(ok, () => fb(t, ok)) } catch { fb(t, ok) } }
+        function copyTSV(rows, cols) {
+            const t = [cols.join('\t'), ...rows.map(r => cols.map(c => fmt(r[c]).replace(/[\t\n\r]/g, ' ')).join('\t'))].join('\n');
+            const ok = () => alert(`${rows.length} baris disalin. Tempel langsung ke Excel/Sheets.`); try { navigator.clipboard.writeText(t).then(ok, () => fb(t, ok)) } catch { fb(t, ok) }
+        }
+        function fb(t, ok) { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); ok() } catch { alert('Gagal menyalin') } a.remove() }
+        $('#f').onchange = e => e.target.files[0] && load(e.target.files[0]); $('#sheet').onchange = e => use(e.target.value);
+        const dr = $('#drop');['dragover', 'dragenter'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); dr.classList.add('on') }));
+        ['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); dr.classList.remove('on') }));
+        document.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) load(f) }); dr.onclick = () => $('#f').click();
+    </script>
+</body>
+
+</html>
